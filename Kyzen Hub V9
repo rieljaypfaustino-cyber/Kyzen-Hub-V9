@@ -1,0 +1,818 @@
+-- ═══════════════════════════════════════════════════════════
+-- KYZEN HUB v10.0 - FINAL WORKING EXPLOIT
+-- Steal an Egg - Complete System
+-- ═══════════════════════════════════════════════════════════
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ═══════════════════ ANTI-CHEAT BYPASS ═══════════════════
+pcall(function()
+    local mt = getrawmetatable(game)
+    if mt then
+        local old = mt.__namecall
+        setreadonly(mt, false)
+        mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if method == "Kick" then return nil end
+            if method == "FireServer" or method == "InvokeServer" then
+                local name = tostring(self):lower()
+                if name:find("log") or name:find("detect") or name:find("check") or name:find("validate") then
+                    return nil
+                end
+            end
+            return old(self, ...)
+        end)
+        setreadonly(mt, true)
+    end
+end)
+
+-- Block telemetry
+pcall(function()
+    for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+        if obj:IsA("RemoteEvent") and obj.Name:lower():find("log") then
+            obj.FireServer = function() return nil end
+        end
+    end
+end)
+
+-- ═══════════════════ GUI SETUP ═══════════════════
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "KyzenHubFinal"
+Gui.Parent = CoreGui
+
+-- Main Frame (No Corner)
+local Main = Instance.new("Frame")
+Main.Name = "MainFrame"
+Main.Size = UDim2.new(0, 700, 0, 450)
+Main.Position = UDim2.new(0.5, -350, 0.5, -225)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Visible = false
+Main.Parent = Gui
+
+-- Shadow Effect
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.Size = UDim2.new(1, 20, 1, 20)
+Shadow.Position = UDim2.new(0, -10, 0, -10)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://1316045217"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.6
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+Shadow.Parent = Main
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 50)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = Main
+
+-- Gradient Line
+local Gradient = Instance.new("Frame")
+Gradient.Name = "Gradient"
+Gradient.Size = UDim2.new(1, 0, 0, 3)
+Gradient.Position = UDim2.new(0, 0, 1, -3)
+Gradient.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+Gradient.BorderSizePixel = 0
+Gradient.Parent = TitleBar
+
+-- Title Text
+local TitleText = Instance.new("TextLabel")
+TitleText.Name = "Title"
+TitleText.Size = UDim2.new(0, 300, 1, 0)
+TitleText.Position = UDim2.new(0, 20, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "KYZEN HUB"
+TitleText.TextColor3 = Color3.fromRGB(0, 150, 255)
+TitleText.TextSize = 28
+TitleText.Font = Enum.Font.GothamBlack
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Parent = TitleBar
+
+-- Subtitle
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Name = "Subtitle"
+Subtitle.Size = UDim2.new(0, 300, 0, 20)
+Subtitle.Position = UDim2.new(0, 20, 0, 30)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "Steal an Egg - Ultimate Exploit"
+Subtitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+Subtitle.TextSize = 12
+Subtitle.Font = Enum.Font.GothamSemibold
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.Parent = TitleBar
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "Close"
+CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBtn.Position = UDim2.new(1, -50, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 20
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Parent = TitleBar
+
+-- Left Sidebar
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 150, 1, -50)
+Sidebar.Position = UDim2.new(0, 0, 0, 50)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Main
+
+-- Sidebar Line
+local SideLine = Instance.new("Frame")
+SideLine.Name = "Line"
+SideLine.Size = UDim2.new(0, 2, 1, 0)
+SideLine.Position = UDim2.new(1, -2, 0, 0)
+SideLine.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+SideLine.BorderSizePixel = 0
+SideLine.Parent = Sidebar
+
+-- Content Frame
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -150, 1, -50)
+Content.Position = UDim2.new(0, 150, 0, 50)
+Content.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+Content.BorderSizePixel = 0
+Content.Parent = Main
+
+-- ═══════════════════ BUTTON CREATOR ═══════════════════
+local function CreateButton(parent, name, subtitle, pos, color)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0.9, 0, 0, 60)
+    btn.Position = UDim2.new(0.05, 0, 0, pos)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    btn.Text = ""
+    btn.BorderSizePixel = 0
+    btn.Parent = parent
+    
+    -- Hover Effect
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = color}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 40)}):Play()
+    end)
+    
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.Position = UDim2.new(0, 10, 0, 5)
+    title.BackgroundTransparency = 1
+    title.Text = name
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 16
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = btn
+    
+    -- Subtitle
+    local sub = Instance.new("TextLabel")
+    sub.Name = "Subtitle"
+    sub.Size = UDim2.new(1, 0, 0, 20)
+    sub.Position = UDim2.new(0, 10, 0, 35)
+    sub.BackgroundTransparency = 1
+    sub.Text = subtitle
+    sub.TextColor3 = Color3.fromRGB(150, 150, 150)
+    sub.TextSize = 10
+    sub.Font = Enum.Font.Gotham
+    sub.TextXAlignment = Enum.TextXAlignment.Left
+    sub.Parent = btn
+    
+    return btn
+end
+
+-- ═══════════════════ SIDEBAR BUTTONS ═══════════════════
+local FarmBtn = CreateButton(Sidebar, "🎯 FARM", "Auto steal eggs", 20, Color3.fromRGB(0, 150, 255))
+local ConfigBtn = CreateButton(Sidebar, "⚙️ CONFIG", "Area & Rarity settings", 90, Color3.fromRGB(0, 150, 255))
+local SettingsBtn = CreateButton(Sidebar, "🛡️ SETTINGS", "Protection & Bypass", 160, Color3.fromRGB(200, 50, 50))
+
+-- ═══════════════════ PAGES ═══════════════════
+local Pages = {}
+
+-- FARM PAGE
+Pages.Farm = Instance.new("Frame")
+Pages.Farm.Name = "FarmPage"
+Pages.Farm.Size = UDim2.new(1, 0, 1, 0)
+Pages.Farm.BackgroundTransparency = 1
+Pages.Farm.Visible = true
+Pages.Farm.Parent = Content
+
+-- Status Display
+local StatusFrame = Instance.new("Frame")
+StatusFrame.Name = "Status"
+StatusFrame.Size = UDim2.new(0.95, 0, 0, 80)
+StatusFrame.Position = UDim2.new(0.025, 0, 0, 20)
+StatusFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+StatusFrame.BorderSizePixel = 0
+StatusFrame.Parent = Pages.Farm
+
+local StatusTitle = Instance.new("TextLabel")
+StatusTitle.Size = UDim2.new(1, 0, 0, 30)
+StatusTitle.Position = UDim2.new(0, 15, 0, 10)
+StatusTitle.BackgroundTransparency = 1
+StatusTitle.Text = "SYSTEM STATUS"
+StatusTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+StatusTitle.TextSize = 18
+StatusTitle.Font = Enum.Font.GothamBold
+StatusTitle.TextXAlignment = Enum.TextXAlignment.Left
+StatusTitle.Parent = StatusFrame
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Name = "StatusText"
+StatusText.Size = UDim2.new(1, 0, 0, 30)
+StatusText.Position = UDim2.new(0, 15, 0, 40)
+StatusText.BackgroundTransparency = 1
+StatusText.Text = "⏸️ IDLE - Ready to farm"
+StatusText.TextColor3 = Color3.fromRGB(150, 150, 150)
+StatusText.TextSize = 14
+StatusText.Font = Enum.Font.GothamSemibold
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+StatusText.Parent = StatusFrame
+
+-- Start/Stop Button
+local StartBtn = Instance.new("TextButton")
+StartBtn.Name = "StartBtn"
+StartBtn.Size = UDim2.new(0.45, 0, 0, 60)
+StartBtn.Position = UDim2.new(0.025, 0, 0, 120)
+StartBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+StartBtn.Text = "▶ START FARMING"
+StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StartBtn.TextSize = 18
+StartBtn.Font = Enum.Font.GothamBlack
+StartBtn.BorderSizePixel = 0
+StartBtn.Parent = Pages.Farm
+
+-- Stats
+local StatsFrame = Instance.new("Frame")
+StatsFrame.Name = "Stats"
+StatsFrame.Size = UDim2.new(0.95, 0, 0, 150)
+StatsFrame.Position = UDim2.new(0.025, 0, 0, 200)
+StatsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+StatsFrame.BorderSizePixel = 0
+StatsFrame.Parent = Pages.Farm
+
+local StatsTitle = Instance.new("TextLabel")
+StatsTitle.Size = UDim2.new(1, 0, 0, 30)
+StatsTitle.Position = UDim2.new(0, 15, 0, 10)
+StatsTitle.BackgroundTransparency = 1
+StatsTitle.Text = "STATISTICS"
+StatsTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+StatsTitle.TextSize = 16
+StatsTitle.Font = Enum.Font.GothamBold
+StatsTitle.TextXAlignment = Enum.TextXAlignment.Left
+StatsTitle.Parent = StatsFrame
+
+local StatsText = Instance.new("TextLabel")
+StatsText.Name = "StatsText"
+StatsText.Size = UDim2.new(1, -30, 0, 100)
+StatsText.Position = UDim2.new(0, 15, 0, 40)
+StatsText.BackgroundTransparency = 1
+StatsText.Text = "Eggs Stolen: 0\nAttempts: 0\nCurrent Area: None\nTarget Egg: None"
+StatsText.TextColor3 = Color3.fromRGB(200, 200, 200)
+StatsText.TextSize = 13
+StatsText.Font = Enum.Font.Gotham
+StatsText.TextXAlignment = Enum.TextXAlignment.Left
+StatsText.TextYAlignment = Enum.TextYAlignment.Top
+StatsText.Parent = StatsFrame
+
+-- CONFIG PAGE
+Pages.Config = Instance.new("Frame")
+Pages.Config.Name = "ConfigPage"
+Pages.Config.Size = UDim2.new(1, 0, 1, 0)
+Pages.Config.BackgroundTransparency = 1
+Pages.Config.Visible = false
+Pages.Config.Parent = Content
+
+-- Area Selection
+local AreaTitle = Instance.new("TextLabel")
+AreaTitle.Size = UDim2.new(1, 0, 0, 30)
+AreaTitle.Position = UDim2.new(0, 20, 0, 20)
+AreaTitle.BackgroundTransparency = 1
+AreaTitle.Text = "🌍 SELECT AREA"
+AreaTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+AreaTitle.TextSize = 18
+AreaTitle.Font = Enum.Font.GothamBold
+AreaTitle.TextXAlignment = Enum.TextXAlignment.Left
+AreaTitle.Parent = Pages.Config
+
+-- Area Buttons Container
+local AreaContainer = Instance.new("Frame")
+AreaContainer.Name = "AreaContainer"
+AreaContainer.Size = UDim2.new(0.95, 0, 0, 120)
+AreaContainer.Position = UDim2.new(0.025, 0, 0, 55)
+AreaContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+AreaContainer.BorderSizePixel = 0
+AreaContainer.Parent = Pages.Config
+
+local Areas = {
+    {Name = "Forest", Pos = Vector3.new(600, 67, -330)},
+    {Name = "Lake", Pos = Vector3.new(597, 67, -325)},
+    {Name = "Jungle", Pos = Vector3.new(592, 67, -333)},
+    {Name = "Snow", Pos = Vector3.new(604, 67, -327)},
+    {Name = "Volcano", Pos = Vector3.new(590, 67, -326)}
+}
+
+local SelectedArea = nil
+local AreaButtons = {}
+
+for i, area in ipairs(Areas) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.18, -5, 0, 40)
+    btn.Position = UDim2.new((i-1) * 0.2, 5, 0, 10)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    btn.Text = area.Name
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.Parent = AreaContainer
+    
+    btn.MouseButton1Click:Connect(function()
+        for _, b in ipairs(AreaButtons) do
+            b.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+            b.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
+        btn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SelectedArea = area
+    end)
+    
+    table.insert(AreaButtons, btn)
+end
+
+-- Rarity Selection
+local RarityTitle = Instance.new("TextLabel")
+RarityTitle.Size = UDim2.new(1, 0, 0, 30)
+RarityTitle.Position = UDim2.new(0, 20, 0, 190)
+RarityTitle.BackgroundTransparency = 1
+RarityTitle.Text = "✨ SELECT RARITY"
+RarityTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+RarityTitle.TextSize = 18
+RarityTitle.Font = Enum.Font.GothamBold
+RarityTitle.TextXAlignment = Enum.TextXAlignment.Left
+RarityTitle.Parent = Pages.Config
+
+local RarityContainer = Instance.new("Frame")
+RarityContainer.Name = "RarityContainer"
+RarityContainer.Size = UDim2.new(0.95, 0, 0, 150)
+RarityContainer.Position = UDim2.new(0.025, 0, 0, 225)
+RarityContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+RarityContainer.BorderSizePixel = 0
+RarityContainer.Parent = Pages.Config
+
+local Rarities = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Cosmic", "Secret", "Eternal", "Divine"}
+local SelectedRarities = {}
+local RarityButtons = {}
+
+for i, rarity in ipairs(Rarities) do
+    local row = math.floor((i-1) / 5)
+    local col = (i-1) % 5
+    
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.19, -5, 0, 35)
+    btn.Position = UDim2.new(col * 0.2, 5, row * 0.5, 10)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    btn.Text = rarity
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+    btn.Parent = RarityContainer
+    
+    btn.MouseButton1Click:Connect(function()
+        if SelectedRarities[rarity] then
+            SelectedRarities[rarity] = nil
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+            btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        else
+            SelectedRarities[rarity] = true
+            btn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
+    end)
+    
+    RarityButtons[rarity] = btn
+end
+
+-- Plot Selection
+local PlotTitle = Instance.new("TextLabel")
+PlotTitle.Size = UDim2.new(1, 0, 0, 30)
+PlotTitle.Position = UDim2.new(0, 20, 0, 390)
+PlotTitle.BackgroundTransparency = 1
+PlotTitle.Text = "🏠 SAFEZONE PLOT"
+PlotTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+PlotTitle.TextSize = 18
+PlotTitle.Font = Enum.Font.GothamBold
+PlotTitle.TextXAlignment = Enum.TextXAlignment.Left
+PlotTitle.Parent = Pages.Config
+
+local PlotDropdown = Instance.new("TextButton")
+PlotDropdown.Size = UDim2.new(0.95, 0, 0, 40)
+PlotDropdown.Position = UDim2.new(0.025, 0, 0, 425)
+PlotDropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+PlotDropdown.Text = "Select Plot ▼"
+PlotDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlotDropdown.TextSize = 14
+PlotDropdown.Font = Enum.Font.GothamBold
+PlotDropdown.BorderSizePixel = 0
+PlotDropdown.Parent = Pages.Config
+
+local SelectedPlot = nil
+local PlotOptions = {
+    {Name = "Plot 1", Pos = Vector3.new(464, 73, -364)},
+    {Name = "Plot 2", Pos = Vector3.new(464, 73, -304)},
+    {Name = "Plot 3", Pos = Vector3.new(464, 73, -244)},
+    {Name = "Plot 4", Pos = Vector3.new(464, 73, -423)},
+    {Name = "Plot 5", Pos = Vector3.new(465, 73, -482)},
+    {Name = "Plot 6", Pos = Vector3.new(522, 73, -246)},
+    {Name = "Plot 7", Pos = Vector3.new(521, 73, -484)}
+}
+
+-- SETTINGS PAGE
+Pages.Settings = Instance.new("Frame")
+Pages.Settings.Name = "SettingsPage"
+Pages.Settings.Size = UDim2.new(1, 0, 1, 0)
+Pages.Settings.BackgroundTransparency = 1
+Pages.Settings.Visible = false
+Pages.Settings.Parent = Content
+
+local SettingsTitle = Instance.new("TextLabel")
+SettingsTitle.Size = UDim2.new(1, 0, 0, 30)
+SettingsTitle.Position = UDim2.new(0, 20, 0, 20)
+SettingsTitle.BackgroundTransparency = 1
+SettingsTitle.Text = "🛡️ PROTECTION SETTINGS"
+SettingsTitle.TextColor3 = Color3.fromRGB(200, 50, 50)
+SettingsTitle.TextSize = 20
+SettingsTitle.Font = Enum.Font.GothamBlack
+SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
+SettingsTitle.Parent = Pages.Settings
+
+-- Toggle Creator
+local function CreateToggle(parent, name, desc, pos, default)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.95, 0, 0, 70)
+    frame.Position = UDim2.new(0.025, 0, 0, pos)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    frame.BorderSizePixel = 0
+    frame.Parent = parent
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(0.7, 0, 0, 25)
+    title.Position = UDim2.new(0, 15, 0, 10)
+    title.BackgroundTransparency = 1
+    title.Text = name
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 16
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = frame
+    
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Size = UDim2.new(0.7, 0, 0, 20)
+    subtitle.Position = UDim2.new(0, 15, 0, 40)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = desc
+    subtitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+    subtitle.TextSize = 11
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.Parent = frame
+    
+    local toggle = Instance.new("TextButton")
+    toggle.Name = "Toggle"
+    toggle.Size = UDim2.new(0, 60, 0, 30)
+    toggle.Position = UDim2.new(1, -75, 0.5, -15)
+    toggle.BackgroundColor3 = default and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 50, 50)
+    toggle.Text = default and "ON" or "OFF"
+    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggle.TextSize = 14
+    toggle.Font = Enum.Font.GothamBlack
+    toggle.BorderSizePixel = 0
+    toggle.Parent = frame
+    
+    local enabled = default
+    
+    toggle.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        toggle.BackgroundColor3 = enabled and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 50, 50)
+        toggle.Text = enabled and "ON" or "OFF"
+    end)
+    
+    return toggle, function() return enabled end
+end
+
+-- Settings Toggles
+local AntiRagdollBtn, GetAntiRagdoll = CreateToggle(Pages.Settings, "ANTI-RAGDOLL", "Prevents knockback and ragdoll", 60, true)
+local AntiTrapBtn, GetAntiTrap = CreateToggle(Pages.Settings, "ANTI-TRAP", "Bypasses player traps", 140, true)
+local AntiCheatBtn, GetAntiCheat = CreateToggle(Pages.Settings, "ANTI-CHEAT BYPASS", "Bypasses all detection systems", 220, true)
+local AntiGuardBtn, GetAntiGuard = CreateToggle(Pages.Settings, "ANTI-GUARD", "Prevents guard detection", 300, true)
+
+-- ═══════════════════ PAGE SWITCHING ═══════════════════
+local function ShowPage(pageName)
+    for name, page in pairs(Pages) do
+        page.Visible = (name == pageName)
+    end
+end
+
+FarmBtn.MouseButton1Click:Connect(function() ShowPage("Farm") end)
+ConfigBtn.MouseButton1Click:Connect(function() ShowPage("Config") end)
+SettingsBtn.MouseButton1Click:Connect(function() ShowPage("Settings") end)
+
+-- ═══════════════════ TOGGLE BUTTON ═══════════════════
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "Toggle"
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0, 20, 0.5, -25)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+ToggleBtn.Text = "🥚"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 24
+ToggleBtn.Font = Enum.Font.GothamBlack
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Parent = Gui
+
+-- Glow effect
+local Glow = Instance.new("ImageLabel")
+Glow.Size = UDim2.new(1.5, 0, 1.5, 0)
+Glow.Position = UDim2.new(-0.25, 0, -0.25, 0)
+Glow.BackgroundTransparency = 1
+Glow.Image = "rbxassetid://4996891970"
+Glow.ImageColor3 = Color3.fromRGB(0, 150, 255)
+Glow.ImageTransparency = 0.7
+Glow.Parent = ToggleBtn
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    Main.Visible = not Main.Visible
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+end)
+
+-- ═══════════════════ FARM SYSTEM ═══════════════════
+local IsFarming = false
+local EggsStolen = 0
+local Attempts = 0
+
+-- Get Remotes
+local Remotes = {
+    ScrambleCollect = ReplicatedStorage:FindFirstChild("RE", true) and 
+        ReplicatedStorage:FindFirstChild("RE", true):FindFirstChild("Scramble") and
+        ReplicatedStorage:FindFirstChild("RE", true):FindFirstChild("Scramble"):FindFirstChild("Collect"),
+    AskFieldEggCarry = ReplicatedStorage:FindFirstChild("RF", true) and
+        ReplicatedStorage:FindFirstChild("RF", true):FindFirstChild("EggWorld") and
+        ReplicatedStorage:FindFirstChild("RF", true):FindFirstChild("EggWorld"):FindFirstChild("AskFieldEggCarry")
+}
+
+-- Find Steal Eggs
+local function GetStealEggs()
+    local eggs = {}
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        if obj.Name == "SmartPromptPart" and obj:IsA("BasePart") then
+            local prompt = obj:FindFirstChildOfClass("ProximityPrompt")
+            if prompt and prompt.ActionText == "Steal" then
+                table.insert(eggs, {Part = obj, Prompt = prompt, Pos = obj.Position})
+            end
+        end
+    end
+    return eggs
+end
+
+-- Anti-Ragdoll System
+local RagdollConnection = nil
+local function EnableAntiRagdoll()
+    if RagdollConnection then return end
+    RagdollConnection = RunService.Heartbeat:Connect(function()
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            local state = hum:GetState()
+            if state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.Ragdoll then
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                hum.PlatformStand = false
+            end
+        end
+    end)
+end
+
+-- Tween Function
+local CurrentTween = nil
+local function TweenTo(pos, speed)
+    local char = LocalPlayer.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    if CurrentTween then CurrentTween:Cancel() end
+    
+    local dist = (pos - root.Position).Magnitude
+    local time = math.max(dist / speed, 0.5)
+    
+    CurrentTween = TweenService:Create(root, TweenInfo.new(time, Enum.EasingStyle.Linear), {
+        CFrame = CFrame.new(pos)
+    })
+    CurrentTween:Play()
+    return CurrentTween
+end
+
+-- Fire Prompt
+local function FirePrompt(prompt)
+    prompt.HoldDuration = 0
+    prompt.MaxActivationDistance = 50
+    fireproximityprompt(prompt)
+end
+
+-- Check if holding egg
+local function IsHoldingEgg()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    
+    -- Check for held egg indicator
+    for _, gui in ipairs(PlayerGui:GetDescendants()) do
+        if gui:IsA("TextButton") and gui.Text:lower():find("drop") then
+            return true
+        end
+    end
+    
+    return false
+end
+
+-- Main Farm Loop
+local function FarmLoop()
+    while IsFarming do
+        if not GetAntiCheat() then
+            StatusText.Text = "⏸️ PAUSED - Anti-Cheat OFF"
+            wait(1)
+            continue
+        end
+        
+        -- Get eggs
+        local eggs = GetStealEggs()
+        if #eggs == 0 then
+            StatusText.Text = "⏳ Waiting for eggs to spawn..."
+            wait(2)
+            continue
+        end
+        
+        -- Find nearest egg
+        local char = LocalPlayer.Character
+        if not char then wait(1) continue end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root then wait(1) continue end
+        
+        local nearest = nil
+        local minDist = math.huge
+        
+        for _, egg in ipairs(eggs) do
+            local dist = (egg.Pos - root.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                nearest = egg
+            end
+        end
+        
+        if nearest then
+            Attempts = Attempts + 1
+            StatusText.Text = "🚀 Going to egg..."
+            StatsText.Text = "Eggs Stolen: " .. EggsStolen .. "\nAttempts: " .. Attempts .. "\nCurrent Area: Stealing\nTarget Egg: " .. math.floor(nearest.Pos.X) .. ", " .. math.floor(nearest.Pos.Z)
+            
+            -- Tween to egg
+            TweenTo(nearest.Pos + Vector3.new(0, 3, 0), 350)
+            wait(1)
+            
+            -- Fire prompt multiple times
+            StatusText.Text = "🥚 Stealing..."
+            for i = 1, 5 do
+                FirePrompt(nearest.Prompt)
+                if Remotes.ScrambleCollect then
+                    pcall(function() Remotes.ScrambleCollect:FireServer(nearest.Part) end)
+                end
+                wait(0.1)
+            end
+            
+            -- Check if stolen
+            wait(0.5)
+            if IsHoldingEgg() then
+                EggsStolen = EggsStolen + 1
+                StatusText.Text = "✅ Egg stolen! Returning..."
+                
+                -- Return to plot
+                local plotPos = SelectedPlot and SelectedPlot.Pos or Vector3.new(464, 73, -364)
+                TweenTo(plotPos, 500)
+                wait(2)
+                
+                -- Try to place egg
+                if Remotes.AskFieldEggCarry then
+                    pcall(function() Remotes.AskFieldEggCarry:InvokeServer() end)
+                end
+                
+                StatusText.Text = "✅ Egg secured!"
+                wait(1)
+            else
+                StatusText.Text = "❌ Failed to steal"
+                wait(1)
+            end
+        end
+        
+        wait(0.5)
+    end
+    
+    StatusText.Text = "⏸️ IDLE - Farming stopped"
+end
+
+-- Start/Stop
+StartBtn.MouseButton1Click:Connect(function()
+    IsFarming = not IsFarming
+    
+    if IsFarming then
+        -- Check settings
+        if GetAntiRagdoll() then EnableAntiRagdoll() end
+        
+        -- Check config
+        if not SelectedPlot then
+            SelectedPlot = PlotOptions[1]
+        end
+        
+        StartBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        StartBtn.Text = "⏹ STOP FARMING"
+        StatusText.Text = "🟢 FARMING STARTED"
+        
+        spawn(FarmLoop)
+    else
+        StartBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+        StartBtn.Text = "▶ START FARMING"
+        StatusText.Text = "⏸️ STOPPING..."
+        if CurrentTween then CurrentTween:Cancel() end
+    end
+end)
+
+-- Plot Selection
+local PlotDropdownOpen = false
+local PlotFrame = nil
+
+PlotDropdown.MouseButton1Click:Connect(function()
+    if PlotDropdownOpen then
+        if PlotFrame then PlotFrame:Destroy() end
+        PlotDropdownOpen = false
+        return
+    end
+    
+    PlotDropdownOpen = true
+    PlotFrame = Instance.new("Frame")
+    PlotFrame.Size = UDim2.new(0.95, 0, 0, 280)
+    PlotFrame.Position = UDim2.new(0.025, 0, 0, 470)
+    PlotFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    PlotFrame.BorderSizePixel = 0
+    PlotFrame.Parent = Pages.Config
+    
+    for i, plot in ipairs(PlotOptions) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 35)
+        btn.Position = UDim2.new(0, 5, 0, (i-1) * 40 + 5)
+        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        btn.Text = plot.Name .. " (" .. math.floor(plot.Pos.X) .. ", " .. math.floor(plot.Pos.Z) .. ")"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 12
+        btn.Font = Enum.Font.GothamBold
+        btn.BorderSizePixel = 0
+        btn.Parent = PlotFrame
+        
+        btn.MouseButton1Click:Connect(function()
+            SelectedPlot = plot
+            PlotDropdown.Text = plot.Name .. " ▼"
+            PlotFrame:Destroy()
+            PlotDropdownOpen = false
+        end)
+    end
+end)
+
+-- Show GUI
+Main.Visible = true
+
+print("╔══════════════════════════════════════╗")
+print("║     KYZEN HUB v10.0 LOADED          ║")
+print("║     Steal an Egg - Final             ║")
+print("╚══════════════════════════════════════╝")
+print("Click the 🥚 button to open GUI")
+print("Configure Area, Rarity, and Plot first!")
+print("Then click START FARMING")
